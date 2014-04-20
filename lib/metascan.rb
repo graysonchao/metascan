@@ -55,7 +55,8 @@ module Metascan
     # If the optional argument "poll" is set to true, then attempt
     # to requery Metascan for the results before returning them.
     def results(poll: true)
-      if poll and @results["scan_results"]["progress_percentage"] < 100
+      if !@results or 
+        (poll and @results["scan_results"]["progress_percentage"] < 100) then
         @results = retrieve_results
       end
       @results
