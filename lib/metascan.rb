@@ -67,7 +67,6 @@ module Metascan
     end
 
     def retrieve_results
-      # this is the only field of the response
       request = Typhoeus::Request.new(
         Metascan::PATHS[:results_by_data_id] + @data_id,
         headers: {
@@ -79,11 +78,11 @@ module Metascan
       response = request.run
       JSON.parse(response.body)
     end
-
   end
 
+  # The Client object, which stores an API key and has a (currently not used)
+  # Typhoeus::Hydra for when you have a lot of requests to make at once.
   class Client
-
     # An API key is required. Free at www.metascan-online.com
     def initialize(api_key)
       @api_key = api_key
@@ -110,7 +109,7 @@ module Metascan
     #   scanner.scan_file(filename, "the eagle has left the nest")
     #   => <Metascan::Scan ... >
     #
-    # https://www.metascan-online.com/en/public-apikbb
+    # https://www.metascan-online.com/en/public-api
     def scan_file(filename, archivepwd: nil)
       scan = Metascan::Scan.new(filename, self)
       scan.run
