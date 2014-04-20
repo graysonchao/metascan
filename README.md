@@ -15,6 +15,15 @@ Usage
     results.clean?
     => true
 
-`results` is a straight `JSON.parse` of the response body in the scan results given by Metascan.
+`results` has all the fields of a straight `JSON.parse` of the response body in the scan results given by Metascan.
 
-For more information on the structure of this object, see the above link.
+It also exposes a few handy methods.
+
++ `Metascan::Scan#clean?` 
+returns true iff the scan came back with no threat detected, or the file was empty.
++ `Metascan::Scan#retrieve_results` 
+makes an API call and updates self.results with the latest scan progress.
++ `Metascan::Scan#results(poll: true)` 
+returns last fetched results; if `poll == true`, `retrieve_results` is called first.
+
+For more information on the structure of the Metascan response object, see the above link under "Retrieving scan reports using data hash."
