@@ -15,44 +15,58 @@ module Metascan
   # exposes methods to inspect the scan results.
   class Scan
     def initialize(filename, client, archivepwd: nil)
-      @filename = filename
-      @client = client
-
-      @request = Typhoeus::Request.new(
-        Metascan::PATHS[:scan_file],
-        headers: {
-          'filename' => filename,
-          'archivepwd' => archivepwd,
-          'apikey' => client.api_key
-        }.select { |k, v| !v.nil? },
-        method: :post,
-        body: { file: File.open(filename, "r") }
-      )
+      @filename   = filename
+      @client     = client
+      @archivepwd = archivepwd
     end
 
+    # Initiate a scan of @filename
     def run
-      @response = nil
-      @request.on_complete do |r|
+      request = Typhoeus::Request.new(
+        Metascan::PATHS[:scan_file],
+        headers: {
+          'filename' => @filename,
+          'archivepwd' => @archivepwd,
+          'apikey' => @client.api_key
+        }.select { |k, v| !v.nil? },
+        method: :post,
+        body: { file: File.open(@filename, "r") }
+      )
+
+      request.on_complete do |r|
         @data_id = JSON.parse(r.body)["data_id"]
         retrieve_results
       end
-      puts @results
+
+      request.run
     end
 
+    # Is my file clean?
     def clean?
+      self.results["scan_results"]["scan_all_result_i"] == 0
     end
 
-    def results
-      nil || @results
+    # Only useful for testing.
+    def results=(results)
+      @results = results
+    end
+
+    # Return the results of my scan.
+    # If the optional argument "poll" is set to true, then attempt
+    # to requery Metascan for the results before returning them.
+    def results(poll: true)
+      if poll and @results["scan_results"]["progress_percentage"] < 100
+        @results = retrieve_results
+      end
+      @results
     end
 
     def data_id
-      nil || @data_id
+      @data_id
     end
 
-    private
     def retrieve_results
-      # this is the only field of the responsek
+      # this is the only field of the response
       request = Typhoeus::Request.new(
         Metascan::PATHS[:results_by_data_id] + @data_id,
         headers: {
@@ -60,8 +74,9 @@ module Metascan
         },
         method: :get
       )
+
       response = request.run
-      @results = JSON.parse(response.body)
+      JSON.parse(response.body)
     end
 
   end
@@ -71,7 +86,7 @@ module Metascan
     # An API key is required. Free at www.metascan-online.com
     def initialize(api_key)
       @api_key = api_key
-      @hydra = Typhoeus::Hydra.hydra
+      @hydra   = Typhoeus::Hydra.hydra
     end
 
     def api_key
