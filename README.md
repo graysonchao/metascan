@@ -11,6 +11,7 @@ Usage
     scanner = Metascan::Client.new(MY_API_KEY) 
     filename = "/etc/unwise-backups/passwd.rar" # FULLY QUALIFIED
     results = scanner.scan_file(filename, "the eagle has left the nest")
+    => <Metascan::Scan ... >
     results.clean?
     => true
 
