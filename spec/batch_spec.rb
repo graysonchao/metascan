@@ -21,9 +21,10 @@ describe Metascan::Batch do
     end
 
     context 'without valid scan' do
-      it 'does nothing' do
-        @batch.add "Not a Metascan::Scan object"
-        @batch.scans.length.should eq(0)
+      it 'raises error' do
+        expect {
+          @batch.add "Not a Metascan::Scan object"
+        }.to raise_error
       end
     end
   end

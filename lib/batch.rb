@@ -23,7 +23,7 @@ module Metascan
     # Add a scan to my scans, man.
     def add(scan)
       unless scan.kind_of? Metascan::Scan
-        return
+       raise TypeError, "Must pass a Scan object to Batch.add"
       end
       @scans = @scans.merge({ scan.filename => scan })
       @hydra.queue(scan.request)
@@ -41,10 +41,17 @@ module Metascan
 
     def run
       @hydra.run
+    end
+
+    # Retrieve results for all the Scans in my batch.
+    # Uses the hydra for parallel processing.
+    # Call this AFTER calling #run.
+    def retrieve_results
+      results_hydra = Typhoeus::Hydra.new
       @scans.each do |id, s|
-        @hydra.queue(s.retrieve_results)
+        results_hydra.queue(s.retrieve_results)
       end
-      @hydra.run
+      results_hydra.run
     end
 
   end
