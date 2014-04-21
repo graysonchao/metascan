@@ -15,6 +15,7 @@ module Metascan
   # exposes methods to inspect the scan results.
   class Scan
     attr_reader :data_id
+    attr_reader :filename
 
     def initialize(filename, client, archivepwd: nil)
       @filename   = filename
@@ -24,23 +25,7 @@ module Metascan
 
     # Initiate a scan of @filename
     def run
-      request = Typhoeus::Request.new(
-        Metascan::PATHS[:scan_file],
-        headers: {
-          'filename' => @filename,
-          'archivepwd' => @archivepwd,
-          'apikey' => @client.api_key
-        }.select { |k, v| !v.nil? },
-        method: :post,
-        body: { file: File.open(@filename, "r") }
-      )
-
-      request.on_complete do |r|
-        @data_id = JSON.parse(r.body)["data_id"]
-        retrieve_results
-      end
-
-      request.run
+      self.request.run
     end
 
     # Construct and return the request I use, for the purpose of
@@ -59,7 +44,6 @@ module Metascan
 
       request.on_complete do |r|
         @data_id = JSON.parse(r.body)["data_id"]
-        retrieve_results
       end
 
       request
@@ -82,13 +66,14 @@ module Metascan
     def results(poll: false)
       if poll and
         (!@results or @results["scan_results"]["progress_percentage"] < 100) then
-        @results = retrieve_results
+        retrieve_results.run
       end
       @results
     end
 
-    # Make an AJAX call to retrieve the latest scan results for @data_id.
-    # Runs the request in serial as of right now.
+    # Returns a HTTP request to retrieve the latest scan results for me.
+    # Fails if called before @data_id is set (when self.run is called, or
+    # my Batch runs me)
     def retrieve_results
       request = Typhoeus::Request.new(
         Metascan::PATHS[:results_by_data_id] + @data_id,
@@ -98,8 +83,11 @@ module Metascan
         method: :get
       )
 
-      response = request.run
-      JSON.parse(response.body)
+      request.on_complete do |r|
+        @results = JSON.parse(r.body)
+      end
+
+      request
     end
   end
 end

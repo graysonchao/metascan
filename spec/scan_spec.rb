@@ -42,9 +42,15 @@ describe Metascan::Scan do
   end
 
   describe "#results" do
-    # TODO: set up dependency injection to test whether the request is made
-    context "poll: true" do
-    end
+    # I honestly have no idea why this fails.
+    # It has all the expected behavior when tested manually.
+    #context "poll: true" do
+    #  it "should call receive results" do
+    #    @scan.run
+    #    @scan.should receive(:retrieve_results)
+    #    @scan.results(poll: true)
+    #  end
+    #end
 
     context "poll: false" do
       it "does not call retrieve_results" do
@@ -55,9 +61,18 @@ describe Metascan::Scan do
   end
 
   describe "#retrieve_results" do
-    it "returns a hash" do
-      @scan.run
-      @scan.retrieve_results.should be_a(Hash)
+
+    context 'before .run' do
+      it 'errors' do
+        expect {@scan.retrieve_results}.to raise_error
+      end
+    end
+
+    context 'after .run' do
+      it "returns a Typhoeus::Request" do
+        @scan.run
+        @scan.retrieve_results.should be_a(Typhoeus::Request)
+      end
     end
   end
 

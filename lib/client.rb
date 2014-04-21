@@ -46,14 +46,14 @@ module Metascan
     #   scanner = Metascan::Client.new(MY_API_KEY)
     #   filenames = ["/etc/passwd", "/dev/sda0", "/dev/random.tgz"] # don't try this
     #   scanner.scan_files(filenames, archivepwds: { "/dev/random.tgz" => "hunter2" })
+    #   => <Metascan::Batch ...>
     def scan_batch(filenames, archivepwds: nil)
-      scans = []
+      scans = Metascan::Batch.new(self.hydra)
       filenames.each do |f|
-        scan = Metascan::QueuedScan.new(filename, self)
-        scans << scan
-        self.hydra.queue(scan.request)
+        scan = Metascan::QueuedScan.new(f, self, scans)
+        scans.add(scan)
       end
-      self.hydra.run
+      scans.run
       scans
     end
   end
