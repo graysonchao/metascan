@@ -50,7 +50,7 @@ module Metascan
     def scan_batch(filenames, archivepwds: nil)
       scans = Metascan::Batch.new(self.hydra)
       filenames.each do |f|
-        scan = Metascan::QueuedScan.new(f, self, scans)
+        scan = Metascan::Scan.new(f, self)
         scans.add(scan)
       end
       scans.run
