@@ -1,6 +1,6 @@
 require 'rspec'
-require './lib/metascan'
 require 'spec_helper'
+require_relative '../metascan'
 
 describe Metascan::Client do
   before :each do
@@ -10,6 +10,13 @@ describe Metascan::Client do
   describe "#scan_file" do
     it "returns a Metascan::Scan object" do
       @client.scan_file('./spec/DKlol.png').should be_a(Metascan::Scan)
+    end
+  end
+
+  describe "#scan_batch" do
+    it "returns a Metascan::Batch object" do
+      files = ['./spec/DKlol.png', './spec/DKlol.png']
+      @client.scan_batch(files).should be_a(Metascan::Batch)
     end
   end
 

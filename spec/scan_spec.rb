@@ -1,6 +1,6 @@
 require 'rspec'
-require './lib/metascan'
 require 'spec_helper'
+require_relative '../metascan'
 
 describe Metascan::Scan do
   before :each do

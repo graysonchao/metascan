@@ -3,7 +3,7 @@ module Metascan
   require 'typhoeus'
   require 'json'
 
-  # Constants like paths and stuff.
+  # Paths to use for api calls.
   PATHS = {
     :scan_file            => "https://api.metascan-online.com/v1/file",
     :results_by_data_id   => "https://api.metascan-online.com/v1/file/",
@@ -14,6 +14,8 @@ module Metascan
   # Initialized with the parameters to scan,
   # exposes methods to inspect the scan results.
   class Scan
+    attr_reader :data_id
+
     def initialize(filename, client, archivepwd: nil)
       @filename   = filename
       @client     = client
@@ -41,9 +43,32 @@ module Metascan
       request.run
     end
 
-    # Is my file clean?
-    def clean?
-      self.results["scan_results"]["scan_all_result_i"] == 0
+    # Construct and return the request I use, for the purpose of
+    # queueing in a Typhoeus::Hydra.
+    def request
+      request = Typhoeus::Request.new(
+        Metascan::PATHS[:scan_file],
+        headers: {
+          'filename' => @filename,
+          'archivepwd' => @archivepwd,
+          'apikey' => @client.api_key
+        }.select { |k, v| !v.nil? },
+        method: :post,
+        body: { file: File.open(@filename, "r") }
+      )
+
+      request.on_complete do |r|
+        @data_id = JSON.parse(r.body)["data_id"]
+        retrieve_results
+      end
+
+      request
+    end
+
+    # Returns true iff the Metascan virus scan found no threats.
+    # If POLL is true (false by default) then retrieve_results first.
+    def clean?(poll: false)
+      self.results(poll: poll)["scan_results"]["scan_all_result_i"] == 0
     end
 
     # Only useful for testing.
@@ -54,18 +79,16 @@ module Metascan
     # Return the results of my scan.
     # If the optional argument "poll" is set to true, then attempt
     # to requery Metascan for the results before returning them.
-    def results(poll: true)
-      if !@results or 
-        (poll and @results["scan_results"]["progress_percentage"] < 100) then
+    def results(poll: false)
+      if poll and
+        (!@results or @results["scan_results"]["progress_percentage"] < 100) then
         @results = retrieve_results
       end
       @results
     end
 
-    def data_id
-      @data_id
-    end
-
+    # Make an AJAX call to retrieve the latest scan results for @data_id.
+    # Runs the request in serial as of right now.
     def retrieve_results
       request = Typhoeus::Request.new(
         Metascan::PATHS[:results_by_data_id] + @data_id,
@@ -77,43 +100,6 @@ module Metascan
 
       response = request.run
       JSON.parse(response.body)
-    end
-  end
-
-  # The Client object, which stores an API key and has a (currently not used)
-  # Typhoeus::Hydra for when you have a lot of requests to make at once.
-  class Client
-    # An API key is required. Free at www.metascan-online.com
-    def initialize(api_key)
-      @api_key = api_key
-      @hydra   = Typhoeus::Hydra.hydra
-    end
-
-    def api_key
-      @api_key
-    end
-
-    # A Typhoeus Hydra manages parallel HTTP requests.
-    def hydra
-      if !@hydra
-        @hydra = Typhoeus::Hydra.hydra
-      end
-      @hydra
-    end
-
-    # Returns a Scan object
-    # Sample usage:
-    #
-    #   scanner = Metascan::Client.new(MY_API_KEY) 
-    #   filename = "/etc/unwise-backups/passwd.rar" # FULLY QUALIFIED
-    #   scanner.scan_file(filename, archivepwd: "the eagle has left the nest")
-    #   => <Metascan::Scan ... >
-    #
-    # https://www.metascan-online.com/en/public-api
-    def scan_file(filename, archivepwd: nil)
-      scan = Metascan::Scan.new(filename, self)
-      scan.run
-      scan
     end
   end
 end
