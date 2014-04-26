@@ -26,7 +26,7 @@ module Metascan
        raise TypeError, "Must pass a Scan object to Batch.add"
       end
       @scans = @scans.merge({ scan.filename => scan })
-      @hydra.queue(scan.request)
+      @hydra.queue scan.request
     end
 
     # Return true iff all my scans are clean.
@@ -36,7 +36,7 @@ module Metascan
 
     # Return a list of all the dirty scans in my batch.
     def dirty
-      @scans.select{ |id, s| !s.clean? }
+      @scans.select{ |id, s| !(s.clean? poll: true) }.map{ |id, s| s }
     end
 
     def run

@@ -16,7 +16,7 @@ describe Metascan::Batch do
       it 'adds the scan to my scans hash' do
         s = Metascan::Scan.new("./spec/DKlol.png", @client)
         @batch.add s
-        @batch.scans.should have_key("./spec/DKlol.png")
+        @batch.scans.should include ({ s.filename => s })
       end
     end
 
@@ -32,6 +32,7 @@ describe Metascan::Batch do
   describe '#clean?' do
     context 'when all scans are clean' do
       it 'returns true' do
+        switch_scan_dirt false
         2.times do
           s = Metascan::Scan.new("./spec/DKlol.png", @client)
           @batch.add s
@@ -43,20 +44,39 @@ describe Metascan::Batch do
 
     context 'when some scans are not clean' do
       it 'returns false' do
-        dirty_response = JSON.dump({
-          "file_id" => "sample_file_id",
-          "scan_results" => {
-            "scan_all_result_i" => 1
-          }
-        })
-        stub_request(:get, "#{Metascan::PATHS[:results_by_data_id]}sample_data_id").
-          to_return(status: 200, body: dirty_response, headers: {})
+        switch_scan_dirt true
+        s = Metascan::Scan.new("./spec/DKlol.png", @client)
+        @batch.add s
+        @batch.run
+        @batch.clean?.should eq(false)
+      end
+    end
+  end
+
+  describe '#dirty' do
+    context 'with no dirty scans' do
+      it 'returns an empty list' do
+        switch_scan_dirt false
         2.times do
           s = Metascan::Scan.new("./spec/DKlol.png", @client)
           @batch.add s
         end
         @batch.run
-        @batch.clean?.should eq(false)
+        @batch.dirty.length.should eq(0)
+      end
+    end
+
+    context 'with a dirty scan' do
+      it 'returns the dirty scan' do
+
+        s = Metascan::Scan.new("./spec/DKlol.png", @client)
+        @batch.add s
+
+        @batch.run
+        switch_scan_dirt true
+        @batch.retrieve_results
+
+        @batch.dirty.should include s
       end
     end
   end
