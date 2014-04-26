@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
     'http://rubygems.org/gems/metascan'
   s.license       = 'MIT'
   s.add_development_dependency 'rspec'
+  s.add_development_dependency 'webmock'
   s.add_runtime_dependency 'typhoeus',
     [">= 0.6.8"]
 end

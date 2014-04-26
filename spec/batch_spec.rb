@@ -4,7 +4,7 @@ require_relative '../metascan'
 
 describe Metascan::Batch do
   before :all do
-    @client = Metascan::Client.new(API_KEY)
+    @client = Metascan::Client.new("apikey")
   end
 
   before :each do
@@ -43,6 +43,20 @@ describe Metascan::Batch do
 
     context 'when some scans are not clean' do
       it 'returns false' do
+        dirty_response = JSON.dump({
+          "file_id" => "sample_file_id",
+          "scan_results" => {
+            "scan_all_result_i" => 1
+          }
+        })
+        stub_request(:get, "#{Metascan::PATHS[:results_by_data_id]}sample_data_id").
+          to_return(status: 200, body: dirty_response, headers: {})
+        2.times do
+          s = Metascan::Scan.new("./spec/DKlol.png", @client)
+          @batch.add s
+        end
+        @batch.run
+        @batch.clean?.should eq(false)
       end
     end
   end

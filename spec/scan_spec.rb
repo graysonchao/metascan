@@ -4,7 +4,7 @@ require_relative '../metascan'
 
 describe Metascan::Scan do
   before :each do
-    @client = Metascan::Client.new(API_KEY)
+    @client = Metascan::Client.new("apikey")
     @scan = Metascan::Scan.new("./spec/DKlol.png", @client)
   end
 

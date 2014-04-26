@@ -4,7 +4,7 @@ require_relative '../metascan'
 
 describe Metascan::Client do
   before :each do
-    @client = Metascan::Client.new(API_KEY)
+    @client = Metascan::Client.new("apikey")
   end
 
   describe "#scan_file" do
@@ -22,7 +22,7 @@ describe Metascan::Client do
 
   describe "#api_key" do
     it "returns the client's API key" do
-      @client.api_key.should eq(API_KEY)
+      @client.api_key.should eq("apikey")
     end
   end
 

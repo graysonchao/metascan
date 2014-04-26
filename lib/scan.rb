@@ -3,13 +3,6 @@ module Metascan
   require 'typhoeus'
   require 'json'
 
-  # Paths to use for api calls.
-  PATHS = {
-    :scan_file            => "https://api.metascan-online.com/v1/file",
-    :results_by_data_id   => "https://api.metascan-online.com/v1/file/",
-    :results_by_file_hash => "https://api.metascan-online.com/v1/hash/"
-  }
-
   # A single scan on the Metascan service.
   # Initialized with the parameters to scan,
   # exposes methods to inspect the scan results.
