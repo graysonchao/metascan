@@ -37,15 +37,19 @@ module Metascan
 
       request.on_complete do |r|
         @data_id = JSON.parse(r.body)["data_id"]
+        @rest_ip = JSON.parse(r.body)["rest_ip"].split(":")[0] + '/v2/file'
       end
-
       request
     end
 
     # Returns true iff the Metascan virus scan found no threats.
     # If POLL is true (false by default) then retrieve_results first.
     def clean?(poll: false)
-      self.results(poll: poll)["scan_results"]["scan_all_result_i"] == 0
+      if self.results(poll: poll)["scan_results"]["progress_percentage"] < 100 then
+        nil
+      else
+        self.results(poll: poll)["scan_results"]["scan_all_result_i"] == 0
+      end
     end
 
     # Only useful for testing.
@@ -69,7 +73,7 @@ module Metascan
     # my Batch runs me)
     def retrieve_results
       request = Typhoeus::Request.new(
-        Metascan::PATHS[:results_by_data_id] + @data_id,
+        @rest_ip + '/' + @data_id,
         headers: {
           'apikey' => @client.api_key
         },
