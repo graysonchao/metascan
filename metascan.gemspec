@@ -7,10 +7,10 @@ Gem::Specification.new do |s|
   s.authors     = ["Grayson Chao"]
   s.email       = 'graysonchao@berkeley.edu'
   s.files       = [
-    "metascan.rb",
-    "lib/client.rb",
-    "lib/batch.rb",
-    "lib/scan.rb"
+    "lib/metascan.rb",
+    "lib/metascan/client.rb",
+    "lib/metascan/batch.rb",
+    "lib/metascan/scan.rb"
   ]
   s.homepage    =
     'http://rubygems.org/gems/metascan'

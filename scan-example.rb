@@ -1,4 +1,4 @@
-require_relative 'metascan'
+require 'metascan'
 
 ### Create a new scan object ###
 scanner = Metascan::Client.new(MY_API_KEY)
