@@ -11,8 +11,8 @@ module Metascan
   }
 
   # a miserable pile of library classes!
-  require_relative 'lib/scan'
-  require_relative 'lib/client'
-  require_relative 'lib/batch'
+  require_relative 'scan'
+  require_relative 'client'
+  require_relative 'batch'
 
 end

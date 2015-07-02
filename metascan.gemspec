@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Grayson Chao"]
   s.email       = 'graysonchao@berkeley.edu'
   s.files       = [
-    "metascan.rb",
+    "lib/metascan.rb",
     "lib/client.rb",
     "lib/batch.rb",
     "lib/scan.rb"
