@@ -8,9 +8,9 @@ Gem::Specification.new do |s|
   s.email       = 'graysonchao@berkeley.edu'
   s.files       = [
     "lib/metascan.rb",
-    "lib/client.rb",
-    "lib/batch.rb",
-    "lib/scan.rb"
+    "lib/metascan/client.rb",
+    "lib/metascan/batch.rb",
+    "lib/metascan/scan.rb"
   ]
   s.homepage    =
     'http://rubygems.org/gems/metascan'
