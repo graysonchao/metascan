@@ -7,7 +7,8 @@ module Metascan
   PATHS = {
     :scan_file            => "https://scan.metascan-online.com/v2/file",
     :results_by_data_id   => "https://scan.metascan-online.com/v2/file",
-    :results_by_file_hash => "https://hashlookup.metascan-online.com/v2/hash"
+    :results_by_file_hash => "https://hashlookup.metascan-online.com/v2/hash",
+    :scan_ip              => "https://ipscan.metascan-online.com/v1/scan/"
   }
 
   # a miserable pile of library classes!
