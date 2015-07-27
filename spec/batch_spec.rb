@@ -1,6 +1,5 @@
 require 'rspec'
 require 'spec_helper'
-require_relative '../metascan'
 
 describe Metascan::Batch do
   before :all do
@@ -24,7 +23,7 @@ describe Metascan::Batch do
       it 'raises error' do
         expect {
           @batch.add "Not a Metascan::Scan object"
-        }.to raise_error
+        }.to raise_error TypeError
       end
     end
   end

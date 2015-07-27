@@ -2,6 +2,7 @@ module Metascan
 
   require 'typhoeus'
   require 'json'
+  require 'uri'
 
   # A single scan on the Metascan service.
   # Initialized with the parameters to scan,
@@ -37,12 +38,12 @@ module Metascan
 
       request.on_complete do |r|
         @data_id = JSON.parse(r.body)["data_id"]
-        @rest_ip = JSON.parse(r.body)["rest_ip"].split(":")[0] + '/v2/file'
+        @rest_ip = _build_rest_ip(JSON.parse(r.body)["rest_ip"])
       end
       request
     end
 
-    # Returns true iff the Metascan virus scan found no threats.
+    # Returns true if the Metascan virus scan found no threats.
     # If POLL is true (false by default) then retrieve_results first.
     def clean?(poll: false)
       if self.results(poll: poll)["scan_results"]["progress_percentage"] < 100 then
@@ -72,6 +73,7 @@ module Metascan
     # Fails if called before @data_id is set (when self.run is called, or
     # my Batch runs me)
     def retrieve_results
+      raise ScanDataIdMissing, "Scan " if self.data_id.nil?
       request = Typhoeus::Request.new(
         @rest_ip + '/' + @data_id,
         headers: {
@@ -85,6 +87,17 @@ module Metascan
       end
 
       request
+    end
+
+    private
+
+    # Parse URI correctly regardless of port
+    # inputs "rest_ip": "scan53.metascan-online.com:443/v2"
+    # "rest_ip": "scan.metascan-online.com"
+    def _build_rest_ip(rest_ip)
+       uri = URI.parse(rest_ip)
+       api_path = '/v2/file'
+       return "#{uri.scheme}://#{uri.host}#{api_path}"
     end
   end
 end
