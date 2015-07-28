@@ -1,4 +1,3 @@
-require 'pry'
 require 'webmock/rspec'
 require 'json'
 $LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
