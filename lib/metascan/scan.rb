@@ -73,7 +73,7 @@ module Metascan
     # Fails if called before @data_id is set (when self.run is called, or
     # my Batch runs me)
     def retrieve_results
-      raise ScanDataIdMissing, "Scan " if self.data_id.nil?
+      raise ScanDataIdMissing, "Scan data_id is missing. Scan may not have been submitted." if self.data_id.nil?
       request = Typhoeus::Request.new(
         @rest_ip + '/' + @data_id,
         headers: {
