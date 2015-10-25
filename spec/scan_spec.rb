@@ -1,6 +1,6 @@
 require 'rspec'
 require 'spec_helper'
-require_relative '../metascan'
+
 
 describe Metascan::Scan do
   before :each do
@@ -14,11 +14,11 @@ describe Metascan::Scan do
       @scan.data_id.should_not be(nil)
     end
   end
-  
+
   describe "#clean?" do
     context "when scan_all_result_i is 0" do
       it "returns true" do
-        @scan.results = { 
+        @scan.results = {
           "scan_results" => {
             "scan_all_result_i" => 0,
             "progress_percentage" => 100
@@ -30,7 +30,7 @@ describe Metascan::Scan do
 
     context "when scan_all_result_i is not 0" do
       it "returns false" do
-        @scan.results = { 
+        @scan.results = {
           "scan_results" => {
             "scan_all_result_i" => 1,
             "progress_percentage" => 100
@@ -64,7 +64,7 @@ describe Metascan::Scan do
 
     context 'before .run' do
       it 'errors' do
-        expect {@scan.retrieve_results}.to raise_error
+        expect {@scan.retrieve_results}.to raise_error Metascan::ScanDataIdMissing
       end
     end
 

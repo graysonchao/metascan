@@ -4,6 +4,7 @@
 .bundle
 .rvmrc
 .ruby-version
+.ruby-gemset
 .yardoc
 .rake_tasks~
 Gemfile.lock
